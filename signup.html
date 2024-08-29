@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="signup">
+  <button class="btn">
+    <a href="blogs.html" class="btn">Back</a>
+  </button>
+
+  <div class="bebo-form-container">
+    <form id="signupForm">
+      <label for="contact-fullname">Full Name:</label>
+      <input type="text" id="contact-fullname" name="contact-fullname" required><br>
+
+      <label for="contact-email">Email:</label>
+      <input type="email" id="contact-email" name="contact-email" required><br>
+
+      <label for="contact-password">Password:</label>
+      <input type="password" id="contact-password" name="contact-password" required><br>
+
+      <label for="contact-help">Gender</label>
+      <select id="contact-help" name="contact-help">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <div id="contactt">
+    <h1>Sign Up Now!</h1>
+    <p><span style="font-weight: bold;">Sign up to see our daily blogs</span></p>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      const fullName = document.getElementById('contact-fullname').value;
+      const email = document.getElementById('contact-email').value;
+      const password = document.getElementById('contact-password').value;
+      const gender = document.getElementById('contact-help').value;
+
+      // Retrieve existing users or initialize an empty array
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+
+      // Check if the email is already registered
+      const userExists = users.some(user => user.email === email);
+      if (userExists) {
+        alert('This email is already registered.');
+        return;
+      }
+
+      // Add the new user to the users array
+      const newUser = { fullName, email, password, gender };
+      users.push(newUser);
+
+      // Store the updated users array in localStorage
+      localStorage.setItem('users', JSON.stringify(users));
+
+      // Display a success message and redirect to the blogs page
+      alert('Signup Successful!');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+
+</html>
