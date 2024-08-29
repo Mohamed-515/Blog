@@ -1,8 +1,8 @@
 # Blog
 Internship Development project 
 
-Project Overview: Gymology Gym Blog
-Gymology Gym Blog is a web application designed for creating, editing, and managing blog posts related to a gym. The application allows users to log in, create posts, edit or delete their own posts, and like or dislike posts. It features a responsive design using HTML, CSS, and JavaScript, and utilizes localStorage to store user data and blog posts.
+Project Overview: Blogy
+Blogy is a web application designed for creating, editing, and managing blog posts. The application allows users to log in, create posts, edit or delete their own posts, and like or dislike posts. It features a responsive design using HTML, CSS, and JavaScript, and utilizes localStorage to store user data and blog posts.
 
 1. File Structure
 blogs.html: The main page that displays blog posts and allows users to like, dislike, edit, or delete posts.
