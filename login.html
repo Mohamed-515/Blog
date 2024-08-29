@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="signup">
+  <button class="btn">
+    <a href="blogs.html" class="btn">Back</a>
+  </button>
+
+  <h1 id="contactt_Login">Login!</h1>
+
+  <div class="bebo-form-container-login">
+    <form id="loginForm">
+      <label for="contact-email">Email:</label>
+      <input type="email" id="contact-email" name="contact-email" required><br>
+
+      <label for="contact-password">Password:</label>
+      <input type="password" id="contact-password" name="contact-password" required><br>
+
+      <input id="submit_login" type="submit" value="Submit">
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      const email = document.getElementById('contact-email').value;
+      const password = document.getElementById('contact-password').value;
+
+      // Retrieve existing users from localStorage
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+
+      // Check if the user exists and the password matches
+      const validUser = users.find(user => user.email === email && user.password === password);
+
+      if (validUser) {
+        alert('Login Successful!');
+        window.location.href = 'blogs.html'; // Redirect to the home page
+      } else {
+        alert('Invalid email or password. Please try again.');
+      }
+    });
+  </script>
+</body>
+
+</html>
