@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Blog Post</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="edit-blog-body">
+
+  <button class="btn">
+    <a href="blogs.html" class="btn">Back</a>
+  </button>
+
+  <h1>Edit Blog Post</h1>
+
+  <div class="edit-blog-form-container">
+    <form id="editBlogForm">
+      <label for="blog-select">Select Blog Post:</label>
+      <select id="blog-select" name="blog-select" required>
+        <option value="">Select a blog post</option>
+        <!-- Options will be populated by JavaScript -->
+      </select><br>
+
+      <label for="blog-title">Title:</label>
+      <input type="text" id="blog-title" name="blog-title" required><br>
+
+      <label for="blog-content">Content:</label>
+      <textarea id="blog-content" name="blog-content" rows="10" required></textarea><br>
+
+      <label for="blog-image">Image URL:</label>
+      <input type="text" id="blog-image" name="blog-image"><br>
+
+      <input id="submit_blog" type="submit" value="Update Blog">
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const blogSelect = document.getElementById('blog-select');
+      const blogTitle = document.getElementById('blog-title');
+      const blogContent = document.getElementById('blog-content');
+      const blogImage = document.getElementById('blog-image');
+      const form = document.getElementById('editBlogForm');
+
+      // Load blog posts into the dropdown
+      function loadBlogTitles() {
+        const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        blogPosts.forEach(post => {
+          const option = document.createElement('option');
+          option.value = post.title;
+          option.textContent = post.title;
+          blogSelect.appendChild(option);
+        });
+      }
+
+      // Populate form fields when a blog post is selected
+      blogSelect.addEventListener('change', function() {
+        const title = blogSelect.value;
+        const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        const blog = blogPosts.find(post => post.title === title);
+
+        if (blog) {
+          blogTitle.value = blog.title;
+          blogContent.value = blog.content;
+          blogImage.value = blog.image || '';
+        }
+      });
+
+      // Update blog post on form submit
+      form.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent form from submitting normally
+
+        const title = blogSelect.value;
+        const newTitle = blogTitle.value;
+        const content = blogContent.value;
+        const image = blogImage.value;
+
+        if (!newTitle.trim()) {
+          alert('Title cannot be empty.');
+          return;
+        }
+
+        let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        const blogIndex = blogPosts.findIndex(post => post.title === title);
+
+        if (blogIndex !== -1) {
+          // Check if new title already exists
+          if (newTitle !== title && blogPosts.some(post => post.title === newTitle)) {
+            alert('A blog post with this title already exists.');
+            return;
+          }
+
+          // Update blog post with new data and current date
+          blogPosts[blogIndex] = {
+            title: newTitle,
+            content,
+            image,
+            date: new Date().toISOString() // Set the current date
+          };
+          localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+          alert('Blog post updated successfully!');
+          window.location.href = 'blogs.html'; // Redirect to blog listing page
+        } else {
+          alert('Blog post not found.');
+        }
+      });
+
+      // Load blog titles into the dropdown
+      loadBlogTitles();
+    });
+  </script>
+</body>
+</html>
