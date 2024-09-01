@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Blog Post - Gymology Blog</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Create a New Blog Post</h1>
+    <nav>
+      <a href="blogs.html">Home</a> |
+      <a href="#" id="logoutButton">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <form id="createBlogForm">
+      <label for="blog-title">Title:</label>
+      <input type="text" id="blog-title" required>
+      <br><br>
+      <label for="blog-content">Content:</label>
+      <textarea id="blog-content" rows="10" required></textarea>
+      <br><br>
+      <label for="blog-image">Image URL:</label>
+      <input type="url" id="blog-image" placeholder="https://example.com/image.jpg">
+      <br><br>
+      <button type="submit">Create Blog Post</button>
+    </form>
+  </main>
+
+  <script>
+    // Check if user is logged in
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      alert('You must be logged in to create a blog post.');
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+      localStorage.removeItem('currentUser');
+      alert('Logged out successfully.');
+      window.location.href = 'login.html';
+    });
+
+    document.getElementById('createBlogForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const title = document.getElementById('blog-title').value.trim();
+      const content = document.getElementById('blog-content').value.trim();
+      const image = document.getElementById('blog-image').value.trim() || 'default_image.jpg';
+      const date = new Date().toISOString();
+
+      if (!title || !content) {
+        alert('Title and content are required.');
+        return;
+      }
+
+      const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+
+      blogPosts.push({
+        id: Date.now(),
+        title,
+        content,
+        image,
+        date,
+        author: currentUser,
+        likes: 0,
+        dislikes: 0
+      });
+
+      localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+      alert('Blog post created successfully!');
+      window.location.href = 'blogs.html';
+    });
+  </script>
+</body>
+</html>
