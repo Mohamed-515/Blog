@@ -12,59 +12,50 @@
     <a href="blogs.html" class="btn">Back</a>
   </button>
 
-  <h1>Delete Blog Post</h1>
+  <h1 id="delete-blog-title">Delete Blog Post</h1>
 
   <div class="delete-blog-form-container">
     <form id="deleteBlogForm">
-      <label for="blog-select">Select Blog Post:</label>
-      <select id="blog-select" name="blog-select" required>
-        <option value="">Select a blog post</option>
-        <!-- Options will be populated by JavaScript -->
-      </select><br>
+      <label for="blog-select">Select Blog to Delete:</label>
+      <select id="blog-select" name="blog-select" required></select><br>
 
-      <input id="delete_blog" type="submit" value="Delete Blog">
+      <input id="submit_delete_blog" type="submit" value="Delete Blog">
     </form>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentUser = localStorage.getItem('currentUser');
       const blogSelect = document.getElementById('blog-select');
-      const form = document.getElementById('deleteBlogForm');
+      const deleteBlogForm = document.getElementById('deleteBlogForm');
 
-      // Load blog posts into the dropdown
-      function loadBlogTitles() {
+      function populateBlogSelect() {
         const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
-        blogPosts.forEach(post => {
-          const option = document.createElement('option');
-          option.value = post.title;
-          option.textContent = post.title;
-          blogSelect.appendChild(option);
+        blogSelect.innerHTML = '';
+
+        blogPosts.forEach((post, index) => {
+          if (post.author === currentUser) {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = post.title;
+            blogSelect.appendChild(option);
+          }
         });
       }
 
-      // Handle blog post deletion on form submit
-      form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form from submitting normally
+      deleteBlogForm.addEventListener('submit', function (event) {
+        event.preventDefault();
 
-        const title = blogSelect.value;
-        let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        const selectedIndex = blogSelect.value;
+        const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        blogPosts.splice(selectedIndex, 1);
 
-        // Find the index of the blog post to delete
-        const blogIndex = blogPosts.findIndex(post => post.title === title);
-
-        if (blogIndex !== -1) {
-          // Remove the blog post from the array
-          blogPosts.splice(blogIndex, 1);
-          localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
-          alert('Blog post deleted successfully!');
-          window.location.href = 'blogs.html'; // Redirect to blog listing page
-        } else {
-          alert('Blog post not found.');
-        }
+        localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
+        alert('Blog post deleted successfully!');
+        window.location.href = 'blogs.html';
       });
 
-      // Load blog titles into the dropdown
-      loadBlogTitles();
+      populateBlogSelect();
     });
   </script>
 </body>
