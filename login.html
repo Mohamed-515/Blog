@@ -41,8 +41,11 @@
       const validUser = users.find(user => user.email === email && user.password === password);
 
       if (validUser) {
+        // Store the logged-in user
+        localStorage.setItem('currentUser', email);
+
         alert('Login Successful!');
-        window.location.href = 'blogs.html'; // Redirect to the home page
+        window.location.href = 'blogs.html'; // Redirect to the blogs page
       } else {
         alert('Invalid email or password. Please try again.');
       }
