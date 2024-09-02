@@ -1,62 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delete Blog Post</title>
+  <title>Blogy Blog</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="delete-blog-body">
 
-  <button class="btn">
-    <a href="blogs.html" class="btn">Back</a>
-  </button>
+<body class="kh-blog-body">
 
-  <h1 id="delete-blog-title">Delete Blog Post</h1>
+  <header class="header">
+    <!-- Image and Buttons -->
+    <div class="image-container">
+      <img class="kh-big-image" src="blog.avif" alt="Big Image of Blogy Blog">
+      <div class="image-buttons">
+        <button class="btn login-signup">
+          <a href="login.html" class="btn">Login</a>
+        </button>
+        <button class="btn login-signup">
+          <a href="signup.html" class="btn">Signup</a>
+        </button>
+        <button class="btn" id="logout-button" style="display: none;">
+          <a href="#" class="btn">Logout</a>
+        </button>
+      </div>
+    </div>
+  </header>
 
-  <div class="delete-blog-form-container">
-    <form id="deleteBlogForm">
-      <label for="blog-select">Select Blog to Delete:</label>
-      <select id="blog-select" name="blog-select" required></select><br>
+  <main>
+    <!-- Action Buttons -->
+    <div class="action-buttons" id="admin-buttons" style="display: none;">
+      <button class="btn" onclick="window.location.href='create_blog.html'">Create Blog</button>
+      <button class="btn" onclick="window.location.href='edit_blog.html'">Edit Blog</button>
+      <button class="btn" onclick="window.location.href='delete_blog.html'">Delete Blog</button>
+    </div>
 
-      <input id="submit_delete_blog" type="submit" value="Delete Blog">
-    </form>
-  </div>
+    <section class="kh-blog-posts">
+      <div class="kh-blog-container"></div>
+    </section>
+  </main>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const currentUser = localStorage.getItem('currentUser');
-      const blogSelect = document.getElementById('blog-select');
-      const deleteBlogForm = document.getElementById('deleteBlogForm');
+      function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        if (isLoggedIn === 'true') {
+          document.getElementById('admin-buttons').style.display = 'block';
+          document.getElementById('logout-button').style.display = 'inline-block';
+          document.querySelectorAll('.login-signup').forEach(btn => btn.style.display = 'none');
+        } else {
+          document.getElementById('logout-button').style.display = 'none';
+          document.querySelectorAll('.login-signup').forEach(btn => btn.style.display = 'inline-block');
+        }
+      }
 
-      function populateBlogSelect() {
-        const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
-        blogSelect.innerHTML = '';
+      function renderBlogPosts() {
+        const blogContainer = document.querySelector('.kh-blog-container');
+        let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        const currentUser = localStorage.getItem('currentUser');
+
+        blogContainer.innerHTML = '';
 
         blogPosts.forEach((post, index) => {
-          if (post.author === currentUser) {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = post.title;
-            blogSelect.appendChild(option);
-          }
+          const postElement = document.createElement('article');
+          postElement.className = 'kh-post';
+
+          const postDate = new Date(post.date);
+          const formattedDate = isNaN(postDate) ? 'Invalid Date' : postDate.toLocaleDateString();
+
+          postElement.innerHTML = `
+            <img src="${post.image || 'default_image.jpg'}" alt="Blog Image for ${post.title}">
+            <div class="post-info">
+              <h3>${post.title}</h3>
+              <p class="date">${formattedDate}</p>
+              <p class="kh-blog-description" style="display: none;">${post.content}</p>
+              <a class="kh-toggleButton" href="#">Show Description</a>
+              <div class="like-dislike-container">
+                <button class="like-button" data-index="${index}">👍 Like (<span id="like-counter-${index}">${post.likes || 0}</span>)</button>
+                <button class="dislike-button" data-index="${index}">👎 Dislike (<span id="dislike-counter-${index}">${post.dislikes || 0}</span>)</button>
+              </div>
+              ${post.author === currentUser ? `
+              <button class="edit-button" onclick="window.location.href='edit_blog.html?postIndex=${index}'">Edit</button>
+              <button class="delete-button" onclick="window.location.href='delete_blog.html?postIndex=${index}'">Delete</button>` : ''}
+            </div>
+          `;
+
+          blogContainer.insertBefore(postElement, blogContainer.firstChild);
+        });
+
+        document.querySelectorAll('.kh-toggleButton').forEach(button => {
+          button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const description = this.previousElementSibling;
+            if (description.style.display === 'none') {
+              description.style.display = 'block';
+              this.textContent = 'Hide Description';
+            } else {
+              description.style.display = 'none';
+              this.textContent = 'Show Description';
+            }
+          });
+        });
+
+        document.querySelectorAll('.like-button').forEach(button => {
+          button.addEventListener('click', function () {
+            handleLikeDislike('like', this.dataset.index);
+          });
+        });
+
+        document.querySelectorAll('.dislike-button').forEach(button => {
+          button.addEventListener('click', function () {
+            handleLikeDislike('dislike', this.dataset.index);
+          });
         });
       }
 
-      deleteBlogForm.addEventListener('submit', function (event) {
-        event.preventDefault();
+      function handleLikeDislike(action, index) {
+        let blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
+        let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
 
-        const selectedIndex = blogSelect.value;
-        const blogPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
-        blogPosts.splice(selectedIndex, 1);
+        const currentUser = localStorage.getItem('currentUser');
+        let post = blogPosts[Number(index)];
 
+        if (!userVotes[currentUser]) {
+          userVotes[currentUser] = {};
+        }
+
+        let userVote = userVotes[currentUser];
+        
+        if (userVote[action]) {
+          if (action === 'like') {
+            post.likes = Math.max(0, (post.likes || 0) - 1);
+          } else {
+            post.dislikes = Math.max(0, (post.dislikes || 0) - 1);
+          }
+          delete userVote[action];
+        } else {
+          if (action === 'like') {
+            if (userVote['dislike']) {
+              post.dislikes = Math.max(0, (post.dislikes || 0) - 1);
+            }
+            post.likes = (post.likes || 0) + 1;
+          } else {
+            if (userVote['like']) {
+              post.likes = Math.max(0, (post.likes || 0) - 1);
+            }
+            post.dislikes = (post.dislikes || 0) + 1;
+          }
+          userVote[action] = true;
+        }
+
+        userVotes[currentUser] = userVote;
         localStorage.setItem('blogPosts', JSON.stringify(blogPosts));
-        alert('Blog post deleted successfully!');
-        window.location.href = 'blogs.html';
+        localStorage.setItem('userVotes', JSON.stringify(userVotes));
+
+        document.getElementById(`like-counter-${index}`).textContent = post.likes || 0;
+        document.getElementById(`dislike-counter-${index}`).textContent = post.dislikes || 0;
+      }
+
+      checkLoginStatus();
+      renderBlogPosts();
+
+      document.querySelector('a[href="login.html"]').addEventListener('click', function () {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentUser', 'user'); // Adjust based on your login system
+        checkLoginStatus();
+        window.location.href = 'login.html';
       });
 
-      populateBlogSelect();
+      document.getElementById('logout-button').addEventListener('click', function () {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        checkLoginStatus();
+        window.location.href = 'blogs.html';
+      });
     });
   </script>
+
 </body>
+
 </html>
